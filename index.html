@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Shooting Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: rgb(63,94,251);
+            background: radial-gradient(circle, rgba(63,94,251,1) 56%, rgba(255,82,117,1) 100%);
+        }
+
+        #gameContainer {
+            width: 400px; /* Adjust the width of the container as needed */
+            height: 300px; /* Adjust the height of the container as needed */
+            position: relative;
+            margin: auto;
+            overflow: hidden;
+            background-color: #00051f;
+            border: 1px solid #ccc;
+            margin-top: 50px; /* Adjust the margin-top to center the container vertically */
+        }
+
+        .duck {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background-color: yellow;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            animation: moveDuck 7s infinite alternate, bounce 10s infinite alternate;
+            animation-play-state: running; /* Ensure animation is running by default */
+            transition: opacity 2s; /* Add opacity transition */
+        }
+
+        .duck.clicked {
+            opacity: 0; /* Set opacity to 0 when the duck is clicked */
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: white; /* Adjust text color */
+        }
+
+        #buttonsContainer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 50%;
+        }
+
+        #startButton {
+            background-color: #4caf50; /* Green */
+            padding: 4px;
+            width: 30px;
+            height: 30px;
+            color: white;
+        }
+
+        #stopButton {
+            background-color: #f44336; /* Red */
+            color: white;
+            width: 30px;
+            height: 30px;
+            font-size: 15px;
+            padding: 4px;
+        }
+
+        @keyframes moveDuck {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            25% {
+                transform: translate(100px, 50px);
+            }
+            50% {
+                transform: translate(300px, 0);
+            }
+            75% {
+                transform: translate(100px, 0px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <div id="score">Score: <span id="scoreValue">0</span></div>
+    <div id="gameCanvas"></div>
+
+    <div id="buttonsContainer">
+        <button id="startButton">&#9654;</button> <!-- Play button symbol -->
+        <button id="stopButton" disabled>&#9724;</button> <!-- Stop button symbol -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('gameContainer');
+        const canvas = document.getElementById('gameCanvas');
+        const scoreElement = document.getElementById('scoreValue');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        let score = 0;
+        let duck;
+        let gameInterval;
+
+        function getRandomPosition() {
+            const x = Math.random() * (container.offsetWidth - 50);
+            const y = Math.random() * (container.offsetHeight - 50);
+            return { x, y };
+        }
+
+        function createDuck() {
+            if (duck) {
+                duck.remove();
+            }
+
+            duck = document.createElement('div');
+            const number = Math.floor(Math.random() * 100) + 1; // Add 1 to avoid 0
+
+            duck.classList.add('duck');
+            const position = getRandomPosition();
+            duck.style.left = `${position.x}px`;
+            duck.style.top = `${position.y}px`;
+            duck.textContent = number;
+
+            const audio = new Audio(`audio/audio${number}.mp3`);
+
+            duck.addEventListener('click', function () {
+                audio.play();
+                duck.classList.add('clicked'); // Add the clicked class
+                score += 1;
+                scoreElement.textContent = score;
+                setTimeout(() => createDuck(), 1000); // Delay the creation of a new duck after fade
+            });
+
+            canvas.appendChild(duck);
+        }
+
+        function gameLoop() {
+            createDuck();
+        }
+
+        function stopGame() {
+            clearInterval(gameInterval);
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        startButton.addEventListener('click', function () {
+            gameInterval = setInterval(gameLoop, 7000); // Create a new duck every 7 seconds
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        });
+
+        stopButton.addEventListener('click', stopGame);
+    });
+</script>
+
+</body>
+</html>
